@@ -1,4 +1,4 @@
-Project Description
+**Project Description**
 
 WebVuln Scanner is a PowerShell-based security assessment tool that automates web application penetration testing. It performs comprehensive vulnerability scanning including directory enumeration, admin panel detection, and credential testing with professional reporting capabilities.
 
