@@ -41,6 +41,70 @@ Comprehensive reporting
 Program Walk-through
 <p align="center"> Launch the utility: <br/> <img src="https://i.imgur.com/62TgaWL.png" height="80%" width="80%" alt="Tool Launch"/> <br /> <br /> Enter target URL: <br/> <img src="https://i.imgur.com/tcTyMUE.png" height="80%" width="80%" alt="URL Input"/> <br /> <br /> Select scan intensity: <br/> <img src="https://i.imgur.com/nCIbXbg.png" height="80%" width="80%" alt="Scan Options"/> <br /> <br /> Review discovered directories: <br/> <img src="https://i.imgur.com/cdFHBiU.png" height="80%" width="80%" alt="Directory Results"/> <br /> <br /> Admin panel test results: <br/> <img src="https://i.imgur.com/JL945Ga.png" height="80%" width="80%" alt="Admin Panel Test"/> <br /> <br /> Sensitive data exposure report: <br/> <img src="https://i.imgur.com/K71yaM2.png" height="80%" width="80%" alt="Data Exposure"/> <br /> <br /> Final vulnerability report: <br/> <img src="https://i.imgur.com/AeZkvFQ.png" height="80%" width="80%" alt="Final Report"/> </p>
 
+Installation
+
+Clone the repository:
+
+git clone https://github.com/yourusername/web-directory-scanner.git
+cd web-directory-scanner
+
+Install dependencies:
+
+.\install.ps1
+
+Run the tool:
+
+.\WebDirectoryScanner.ps1
+
+Usage Examples
+
+Basic scan:
+
+.\WebDirectoryScanner.ps1 -Url http://testphp.vulnweb.com
+
+Intensive scan with credential testing:
+
+.\WebDirectoryScanner.ps1 -Url http://testphp.vulnweb.com -Intensity High -TestCredentials
+
+
+# WebDirectoryScanner.ps1
+
+param(
+    [string]$Url,
+    [ValidateSet('Low','Medium','High')]
+    [string]$Intensity = 'Medium',
+    [switch]$TestCredentials
+)
+
+# Import modules
+. .\modules\directory-enum.ps1
+. .\modules\admin-panel-test.ps1
+. .\modules\report-generator.ps1
+
+function Main {
+    Write-Host "=== Web Directory Enumeration Scanner ===" -ForegroundColor Cyan
+    
+    # Validate URL
+    if (-not $Url) {
+        $Url = Read-Host "Enter target URL (e.g., http://example.com)"
+    }
+    
+    # Perform directory enumeration
+    $discoveredPaths = Invoke-DirectoryEnumeration -Url $Url -Intensity $Intensity
+    
+    # Test for admin panels
+    $adminResults = Test-AdminPanels -Paths $discoveredPaths -Url $Url
+    
+    # If enabled, test default credentials
+    if ($TestCredentials) {
+        $credentialResults = Test-DefaultCredentials -AdminPanels $adminResults
+    }
+    
+    # Generate report
+    New-ScanReport -Url $Url -Paths $discoveredPaths -AdminResults $adminResults -CredentialResults $credentialResults
+}
+
+Main
 
 # WebDirectoryScanner.ps1
 
