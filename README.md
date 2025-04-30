@@ -1,21 +1,38 @@
 Project Description
 
-This PowerShell tool automates the process of web directory enumeration and admin panel detection, helping security professionals identify exposed administrative interfaces and sensitive directories on web servers. The tool leverages common directory brute-forcing techniques to uncover hidden paths and assesses the security of discovered admin panels.
+WebVuln Scanner is a PowerShell-based security assessment tool that automates web application penetration testing. It performs comprehensive vulnerability scanning including directory enumeration, admin panel detection, and credential testing with professional reporting capabilities.
 
 target = "http://testphp.vulnweb.com"
 
-Languages and Utilities Used
+Key Features:
+
+Automated directory brute-forcing (using dirb/gobuster)
+Admin interface detection and credential testing
+Sensitive data exposure identification
+Comprehensive risk assessment matrix
+Professional HTML/PDF report generation
+Customizable scan profiles
+
+Installation:
+# Install prerequisites
+Install-Module -Name PoshRSJob -Force
+Install-Module -Name ImportExcel -Force
+
+# Clone repository
+git clone https://github.com/yourusername/webvuln-scanner.git
+cd webvuln-scanner
+
+# Run tool
+.\WebVulnScanner.ps1
+
+Languages and Utilities Used: 
 PowerShell (Primary scripting language)
-
 dirb (Directory brute-forcing tool)
-
 gobuster (Modern directory/file brute-forcing tool)
-
 curl (For HTTP requests and credential testing)
 
 Environments Used
-Windows 10/11 (21H2 or later)
-
+Windows 10
 Kali Linux (For cross-platform compatibility)
 wordlist = ["admin", "secured", "CVS", "vendor"]  # Replace with your wordlist
 
@@ -29,42 +46,80 @@ for path in wordlist:
 
 Features
 Automated directory enumeration using multiple tools
-
 Admin panel detection and credential testing
-
 Sensitive data exposure identification
-
 Risk assessment with CVE correlation
-
 Comprehensive reporting
 
-Program Walk-through
-<p align="center"> Launch the utility: <br/> <img src="https://i.imgur.com/62TgaWL.png" height="80%" width="80%" alt="Tool Launch"/> <br /> <br /> Enter target URL: <br/> <img src="https://i.imgur.com/tcTyMUE.png" height="80%" width="80%" alt="URL Input"/> <br /> <br /> Select scan intensity: <br/> <img src="https://i.imgur.com/nCIbXbg.png" height="80%" width="80%" alt="Scan Options"/> <br /> <br /> Review discovered directories: <br/> <img src="https://i.imgur.com/cdFHBiU.png" height="80%" width="80%" alt="Directory Results"/> <br /> <br /> Admin panel test results: <br/> <img src="https://i.imgur.com/JL945Ga.png" height="80%" width="80%" alt="Admin Panel Test"/> <br /> <br /> Sensitive data exposure report: <br/> <img src="https://i.imgur.com/K71yaM2.png" height="80%" width="80%" alt="Data Exposure"/> <br /> <br /> Final vulnerability report: <br/> <img src="https://i.imgur.com/AeZkvFQ.png" height="80%" width="80%" alt="Final Report"/> </p>
-
-Installation
-
-Clone the repository:
-
-git clone https://github.com/yourusername/web-directory-scanner.git
-cd web-directory-scanner
-
-Install dependencies:
-
-.\install.ps1
-
-Run the tool:
-
-.\WebDirectoryScanner.ps1
-
 Usage Examples
-
 Basic scan:
+.\WebVulnScanner.ps1 -Target http://testphp.vulnweb.com
 
-.\WebDirectoryScanner.ps1 -Url http://testphp.vulnweb.com
+Comprehensive scan with reporting:
+.\WebVulnScanner.ps1 -Target http://testphp.vulnweb.com -ScanType Full -ReportFormat HTML
 
-Intensive scan with credential testing:
+Credential testing:
+.\WebVulnScanner.ps1 -Target http://testphp.vulnweb.com/admin/ -CredentialFile creds.txt
 
-.\WebDirectoryScanner.ps1 -Url http://testphp.vulnweb.com -Intensity High -TestCredentials
+
+**Scan Methodology:**
+
+Reachability Check - Verify target availability
+Directory Enumeration - Discover hidden paths
+Admin Panel Detection - Identify management interfaces
+Credential Testing - Attempt common/default logins
+Vulnerability Assessment - Evaluate discovered issues
+Report Generation - Create professional documentation
+
+## Target: http://testphp.vulnweb.com
+### Critical Findings:
+- [x] Admin panel accessible at /admin/ with default credentials (test:test)
+- [x] Sensitive data exposure (credit cards, PII)
+- [x] Unprotected source control (/CVS/)
+
+### Risk Assessment:
+| Vulnerability | Severity |
+|---------------|----------|
+| Default credentials | Critical |
+| Data exposure | Critical |
+| Directory listing | High |
+
+### Recommendations:
+1. Change all default credentials immediately
+2. Implement IP whitelisting for admin interfaces
+3. Remove /CVS/ directory
+4. Deploy WAF protection
+
+Technical Implementation
+
+# Core scanning function
+function Invoke-WebScan {
+    param(
+        [string]$Target,
+        [string]$ScanType = 'Standard',
+        [string]$ReportFormat = 'HTML'
+    )
+
+    # Initialize results object
+    $Results = @{
+        Target = $Target
+        StartTime = Get-Date
+        Findings = @()
+    }
+
+    # Perform reachability check
+    $Reachability = Test-TargetReachability -Target $Target
+    $Results.Reachability = $Reachability
+
+    # Directory enumeration
+    if($ScanType -ne 'Quick') {
+        $Directories = Find-Directories -Target $Target -ScanType $ScanType
+        $Results.Directories = $Directories
+    }
+
+    # Generate report
+    New-Report -Results $Results -Format $ReportFormat
+}
 
 
 # WebDirectoryScanner.ps1
